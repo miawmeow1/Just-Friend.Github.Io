@@ -1,0 +1,317 @@
+<!doctype html>
+<html lang="id" data-bs-theme="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Rose &amp; Lily · Garden</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@1,9..144,600&family=Nunito:wght@400;700&display=swap" rel="stylesheet">
+<!-- Bootstrap 5 (CSS) -->
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+<style>
+  :root{ --night:#24101c; --petal:#ffd6e0; --leaf:#3f8a63; }
+  body{
+    font-family:Nunito,system-ui,sans-serif; color:var(--petal); min-height:100vh; overflow-x:hidden;
+    background:radial-gradient(120% 90% at 50% 0%,#4a1832 0%,var(--night) 62%) fixed;
+  }
+  main,.navbar,footer{ position:relative; z-index:1; }
+  .navbar{ background:rgba(36,16,28,.65); -webkit-backdrop-filter:blur(8px); backdrop-filter:blur(8px); }
+  .toast-container{ z-index:5; }
+  .navbar-brand,.display-title{ font-family:Fraunces,serif; font-style:italic; font-weight:600; }
+
+  /* ---------- Hero ---------- */
+  .hero{ padding:7.5rem 0 1rem; text-align:center; }
+  .display-title{ font-size:clamp(3.2rem,12vw,8rem); line-height:1; letter-spacing:-.02em; margin:0; }
+  .lead-soft{ max-width:34rem; margin:1.25rem auto 1.75rem; font-size:1.1rem; }
+
+  /* ---------- Glow text (letters are split by JS) ---------- */
+  .word{ display:inline-block; white-space:nowrap; }
+  .ch{
+    --g:0; display:inline-block;
+    color:#b9738d;
+    color:color-mix(in srgb,#ff8fad calc(var(--g)*100%),#b9738d);
+    text-shadow:0 0 calc(var(--g)*20px) rgba(255,143,171,var(--g)),
+                0 0 calc(var(--g)*46px) rgba(214,40,74,calc(var(--g)*.85));
+    transform:translateY(calc(var(--g)*-4px));
+    transition:color .3s,text-shadow .3s,transform .3s;
+  }
+  .cursor-glow{
+    position:fixed; left:0; top:0; width:300px; height:300px; margin:-150px 0 0 -150px; z-index:0;
+    pointer-events:none; opacity:0; transition:opacity .4s;
+    background:radial-gradient(circle,rgba(255,143,171,.28),rgba(214,40,74,.1) 45%,transparent 70%);
+  }
+
+  /* ---------- Garden ---------- */
+  .garden{ max-width:1100px; margin:0 auto; padding:0 .5rem; }
+  .garden svg{ width:100%; height:auto; display:block; overflow:visible; }
+  .stem{ fill:none; stroke:var(--leaf); stroke-width:5; stroke-linecap:round;
+         stroke-dasharray:1; stroke-dashoffset:1; animation:grow 1.4s var(--d) ease-out forwards; }
+  .leaf{ fill:#4a9a70; transform-box:fill-box; transform-origin:0 50%; animation:pop .8s var(--d) ease-out both; }
+  .head{ transform-box:fill-box; transform-origin:center; animation:bloom 1.6s calc(var(--d) + 1.2s) cubic-bezier(.2,1.4,.4,1) both; }
+  .flower{ animation:sway 6s ease-in-out calc(var(--d) + 3s) infinite; }
+  @keyframes grow{ to{ stroke-dashoffset:0; } }
+  @keyframes pop{ from{ transform:scale(0); } to{ transform:scale(1); } }
+  @keyframes bloom{ from{ transform:scale(0) rotate(-50deg); opacity:0; } to{ transform:scale(1) rotate(0); opacity:1; } }
+  @keyframes sway{ 0%,100%{ transform:rotate(0); } 30%{ transform:rotate(1.8deg); } 70%{ transform:rotate(-1.8deg); } }
+
+  /* ---------- Pesan tersirat ---------- */
+  .meaning{ min-height:4.2rem; max-width:32rem; margin:1.75rem auto 0; font-family:Fraunces,serif; font-style:italic; font-size:1.25rem; line-height:1.5; }
+  .meaning.swap{ animation:fadein .7s ease-out; }
+  @keyframes fadein{ from{ opacity:0; transform:translateY(8px); } to{ opacity:1; transform:none; } }
+
+  /* ---------- Falling petals ---------- */
+  .petal{ position:fixed; top:-6vh; width:12px; height:16px; border-radius:0 100% 0 100%; opacity:.65;
+          pointer-events:none; z-index:0; animation:fall linear infinite; }
+  @keyframes fall{ to{ transform:translate3d(var(--x),112vh,0) rotate(560deg); } }
+
+  /* ---------- Cards ---------- */
+  .card{ --bs-card-color:#f3c9d6; background:rgba(255,214,224,.06); border:1px solid rgba(255,143,171,.2);
+         border-radius:1.25rem; }
+  .card h3{ font-family:Fraunces,serif; font-style:italic; font-size:1.7rem; }
+  .badge-rose{ background:#c8223f; } .badge-pink{ background:#ff8fab; color:#4a1832; }
+  footer{ padding:2.5rem 0 2rem; text-align:center; color:#b9738d; font-size:.9rem; }
+
+  @media (prefers-reduced-motion:reduce){
+    .stem,.leaf,.head,.flower,.petal,.meaning.swap{ animation:none; } .stem{ stroke-dashoffset:0; } .petal{ display:none; }
+  }
+</style>
+</head>
+<body>
+<div class="cursor-glow" id="cursorGlow"></div>
+
+<!-- Bootstrap: navbar -->
+<nav class="navbar navbar-expand-md fixed-top">
+  <div class="container">
+    <a class="navbar-brand" href="#">Rose &amp; Lily</a>
+    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#menu" aria-controls="menu" aria-expanded="false" aria-label="Buka menu">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+    <div class="collapse navbar-collapse" id="menu">
+      <ul class="navbar-nav ms-auto">
+        <li class="nav-item"><a class="nav-link" href="#taman">Taman</a></li>
+        <li class="nav-item"><a class="nav-link" href="#kenali">Kenali bunganya</a></li>
+      </ul>
+    </div>
+  </div>
+</nav>
+
+<main>
+  <section class="hero container">
+    <h1 class="display-title glow">For &amp; YOU</h1>
+    <p class="lead-soft glow">Taman kecil tentang persahabatan, rasa sayang yang tulus, dan hal-hal baik yang patut disyukuri. Tidak akan kangen⚡️, kok—cuma diam-diam mendoakan yang terbaik untukmu😭🤣 dan keluargamu</p>
+
+    <!-- Bootstrap: btn-group + btn-check (radio) -->
+    <div class="d-flex flex-wrap justify-content-center align-items-center gap-3">
+      <div class="btn-group" role="group" aria-label="Pilih warna bunga">
+        <input type="radio" class="btn-check" name="warna" id="w-mix" value="mix" checked>
+        <label class="btn btn-outline-light" for="w-mix">Campur</label>
+        <input type="radio" class="btn-check" name="warna" id="w-red" value="red">
+        <label class="btn btn-outline-light" for="w-red">Merah</label>
+        <input type="radio" class="btn-check" name="warna" id="w-pink" value="pink">
+        <label class="btn btn-outline-light" for="w-pink">Pink</label>
+        <input type="radio" class="btn-check" name="warna" id="w-white" value="white">
+        <label class="btn btn-outline-light" for="w-white">Putih</label>
+      </div>
+      <button class="btn btn-danger rounded-pill px-4" id="replay" type="button">Mekar lagi</button>
+    </div>
+    <p class="meaning glow" id="meaning" aria-live="polite"></p>
+  </section>
+
+  <section class="garden" id="taman">
+    <svg id="garden" viewBox="0 0 1000 440" role="img" aria-label="Taman mawar dan lily merah dan pink">
+      <defs id="defs"></defs>
+      <g id="beds"></g>
+    </svg>
+  </section>
+
+  <!-- Bootstrap: grid (row / col) + card + badge -->
+  <section class="container pb-5 pt-4" id="kenali">
+    <div class="row g-4">
+      <div class="col-12 col-md-4">
+        <div class="card h-100"><div class="card-body p-4">
+          <span class="badge badge-rose rounded-pill mb-3">merah</span>
+          <h3 class="glow"> 🌹Mawar - 🌹 Yang Pernah Berarti 🥀</h3>
+          <p class="mb-0 glow">Ada rasa yang tidak lagi diperjuangkan, tetapi tidak perlu disangkal pernah ada. Sebagian kenangan cukup dihormati tanpa harus diulang kembali.</p>
+        </div></div>
+      </div>
+      <div class="col-12 col-md-4">
+        <div class="card h-100"><div class="card-body p-4">
+          <span class="badge badge-pink rounded-pill mb-3">pink</span>
+          <h3 class="glow"> 🌷 Lily - Ketulusan 🌷 - Kagum serta sayang dari jarak jauh 🌷</h3>
+          <p class="mb-0 glow">Tidak semua kekaguman harus berujung pada kedekatan. Ada orang yang cukup kita hargai dari kejauhan, sambil membiarkan hidupnya berjalan ke arah yang ia pilih.</p>
+        </div></div>
+      </div>
+      <div class="col-12 col-md-4">
+        <div class="card h-100"><div class="card-body p-4">
+          <span class="badge badge-rose rounded-pill mb-3">merah + pink + putih</span>
+          <h3 class="glow">Perpaduan ☁️ - Untuk satu nama</h3>
+          <p class="mb-0 glow">Bukan untuk menariknya kembali, bukan pula untuk meminta lebih. Hanya ada satu nama yang pernah menyimpan banyak cerita, dan kini cukup dititipkan kepada Allah SWT dalam doa-doa yang tidak perlu diketahui siapa-siapa.</p>
+        </div></div>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer>2410002 i made myself, this for me myflowers💐</footer>
+
+<!-- Bootstrap: toast -->
+<div class="toast-container position-fixed bottom-0 end-0 p-3">
+  <div id="toast" class="toast text-bg-dark border-0" role="status" aria-live="polite" data-bs-delay="2200">
+    <div class="toast-body" id="toastMsg"></div>
+  </div>
+</div>
+
+<!-- Bootstrap 5 (JS: collapse + toast) -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+/* ============ 1. Glow text: pecah teks jadi huruf ============ */
+const chars = [];
+function splitGlow(el, text){
+  el.querySelectorAll('.ch').forEach(c => { const k = chars.indexOf(c); if (k > -1) chars.splice(k, 1); });
+  el.setAttribute('aria-label', text);
+  el.textContent = '';
+  text.split(' ').forEach((w, i, all) => {
+    const word = document.createElement('span');
+    word.className = 'word';
+    word.setAttribute('aria-hidden', 'true');
+    [...w].forEach(c => {
+      const s = document.createElement('span');
+      s.className = 'ch'; s.textContent = c;
+      word.append(s); chars.push(s);
+    });
+    el.append(word);
+    if (i < all.length - 1) el.append(' ');
+  });
+}
+document.querySelectorAll('.glow').forEach(el => splitGlow(el, el.textContent.trim()));
+
+let px = -999, py = -999, raf = 0;
+const blob = document.getElementById('cursorGlow');
+function paint(){
+  raf = 0;
+  for (const c of chars){
+    const r = c.getBoundingClientRect();
+    const d = Math.hypot(r.left + r.width/2 - px, r.top + r.height/2 - py);
+    c.style.setProperty('--g', Math.max(0, 1 - d/130).toFixed(3));
+  }
+}
+function move(e){
+  px = e.clientX; py = e.clientY;
+  blob.style.opacity = 1;
+  blob.style.transform = `translate(${px}px,${py}px)`;
+  if (!raf) raf = requestAnimationFrame(paint);
+}
+function leave(){
+  px = py = -999; blob.style.opacity = 0;
+  if (!raf) raf = requestAnimationFrame(paint);
+}
+addEventListener('pointermove', move);
+addEventListener('pointerdown', move);
+addEventListener('pointerup', e => { if (e.pointerType === 'touch') setTimeout(leave, 700); });
+document.documentElement.addEventListener('pointerleave', leave);
+
+/* ============ 2. Bentuk bunga (SVG symbol) ============ */
+const line = 'stroke="rgba(60,0,20,.15)"';
+let rose = '';
+for (let k = 0; k < 5; k++) rose += `<ellipse rx="24" ry="30" cy="-22" transform="rotate(${k*72})" fill="var(--c3)" ${line}/>`;
+for (let k = 0; k < 4; k++) rose += `<ellipse rx="17" ry="22" cy="-14" transform="rotate(${45+k*90})" fill="var(--c2)" ${line}/>`;
+rose += `<circle r="15" fill="var(--c1)"/><path d="M0 -9C9 -9 10 4 0 5C-6 5 -6 -3 0 -3" fill="none" stroke="var(--c2)" stroke-width="2.2" stroke-linecap="round"/>`;
+
+const petal = (a, f) => `<g transform="rotate(${a})"><path d="M0 0C16 -16 14 -44 0 -56C-14 -44 -16 -16 0 0Z" fill="${f}" ${line}/><path d="M0 -6V-44" stroke="var(--c1)" stroke-width="1.6" opacity=".55"/></g>`;
+let lily = [0,120,240].map(a => petal(a+60, 'var(--c2)')).join('') + [0,120,240].map(a => petal(a, 'var(--c3)')).join('');
+for (let k = 0; k < 6; k++) lily += `<g transform="rotate(${k*60+15})"><path d="M0 0Q3 -14 0 -26" stroke="#ffe3a3" stroke-width="2" fill="none"/><ellipse cy="-27" rx="3" ry="5" fill="#f2a93b"/></g>`;
+lily += `<circle r="4" fill="var(--c1)"/>`;
+
+const sym = (id, html) => `<symbol id="${id}" viewBox="-60 -60 120 120" overflow="visible">${html}</symbol>`;
+document.getElementById('defs').innerHTML = sym('rose', rose) + sym('lily', lily);
+
+/* ============ 3. Menanam taman ============ */
+const NS = 'http://www.w3.org/2000/svg';
+const R = ['#7d0f2b', '#c8223f', '#ef5a73'];   // merah: tua, sedang, muda
+const P = ['#d94a78', '#ff8fab', '#ffd0dc'];   // pink:  tua, sedang, muda
+const W = ['#e8b4c4', '#fff1f5', '#ffffff'];   // putih: semburat pink, sedang, putih bersih
+const MIX = [R, P, W];
+const plan = [ // [x, y kepala bunga, jenis, ukuran]
+  [110,250,'lily',120],[230,170,'rose',110],[350,230,'rose',130],[470,120,'lily',150],
+  [590,215,'rose',120],[720,165,'lily',130],[840,245,'rose',115],[925,190,'lily',100]
+];
+function el(name, attrs, parent){
+  const e = document.createElementNS(NS, name);
+  for (const k in attrs) e.setAttribute(k, attrs[k]);
+  if (parent) parent.append(e);
+  return e;
+}
+function plant(mode){
+  const beds = document.getElementById('beds');
+  beds.textContent = '';
+  plan.forEach(([x, y, type, s], i) => {
+    const col = mode === 'red' ? R : mode === 'pink' ? P : mode === 'white' ? W : MIX[i % 3];
+    const d = (i * 0.28).toFixed(2) + 's';
+    const g = el('g', { class:'flower', style:`transform-origin:${x}px 440px;--d:${d}` }, beds);
+    const bend = (i % 2 ? 1 : -1) * 18, h = 440 - y;
+    el('path', { class:'stem', pathLength:1, style:`--d:${d}`,
+      d:`M${x} 440C${x+bend} ${440-h*.4} ${x-bend} ${440-h*.7} ${x} ${y+s*.25}` }, g);
+    [[.35,-1],[.6,1]].forEach(([t, dir], k) => {
+      const lg = el('g', { transform:`translate(${x},${440-h*t}) scale(${dir},1) rotate(-25)` }, g);
+      el('path', { class:'leaf', d:'M0 0C10 -14 32 -14 44 0C32 10 10 10 0 0Z', style:`--d:${(i*0.28+.9+k*.2).toFixed(2)}s` }, lg);
+    });
+    const hg = el('g', { transform:`translate(${x},${y})` }, g);
+    const head = el('g', { class:'head', style:`--d:${d}` }, hg);
+    el('use', { href:'#' + type, x:-s/2, y:-s/2, width:s, height:s, style:`--c1:${col[0]};--c2:${col[1]};--c3:${col[2]}` }, head);
+  });
+}
+
+/* ============ 4. Kelopak jatuh ============ */
+const colors = ['#ef5a73', '#ff8fab', '#ffffff', '#c8223f', '#ffc2d4'];
+for (let i = 0; i < 16; i++){
+  const p = document.createElement('div');
+  p.className = 'petal';
+  p.style.cssText = `left:${Math.random()*100}vw;background:${colors[i%5]};--x:${(Math.random()*160-80).toFixed(0)}px;` +
+    `animation-duration:${(9+Math.random()*8).toFixed(1)}s;animation-delay:-${(Math.random()*14).toFixed(1)}s;` +
+    `transform:scale(${(.7+Math.random()*.7).toFixed(2)})`;
+  document.body.append(p);
+}
+
+/* ============ 5. Tombol & toast Bootstrap ============ */
+const toastEl = document.getElementById('toast');
+const names = { mix:'campur', red:'merah', pink:'pink', white:'putih' };
+const mode = () => document.querySelector('input[name="warna"]:checked').value;
+const msgs = {
+  mix:   ['Little Things from Allah SWT',
+          'Aku cukup mendoakan yang terbaik untukmu. Semoga Allah SWT selalu menjaga langkahmu, melapangkan rezekimu, memudahkan segala urusanmu, dan mengabulkan doa-doa baik mamamu untukmu dan keluarga kalian.😊🫶🏼',
+          'Tidak semua hal indah harus menjadi milik kita selamanya. Terkadang, Allah SWT menghadirkan seseorang untuk menjadi teman sebuah pertemuan untuk menjadi kenangan, atau hal sederhana untuk mengajarkan kita arti syukur.'],
+  red:   ['SOME PEOPLE STAY SPECIAL 🌹',
+          'Ada orang yang tetap spesial, bahkan setelah semuanya kembali menjadi teman biasa. Bukan karena ingin lebih, melainkan karena rasa sayang sebagai teman memang pernah tumbuh sedalam itu 🌒.',
+          'Mengagumimu Tanpa Memiliki Nama 🔥.'],
+  pink:  ['Semoga Kamu Selalu Baik-Baik Saja 🩷',
+          'A SOFT SPOKEN SPOT FOR YOU 🌸',
+          'Dari sekian banyak manusia, ada satu orang yang selalu punya tempat tersendiri. Bukan berarti harus selalu dekat atau memiliki cerita yang sama lagi. Hanya saja, mengenalnya pernah menjadi bagian indah dari hidup ini 🌷.'],
+  white: ['Satu Orang, Banyak Doa🦀.',
+          'Tidak ada benci, tidak ada niat buruk, dan tidak ada keinginan untuk merusak kebahagiaan siapa pun. Kalau sekarang kita hanya teman, semoga aku tetap bisa menghargaimu sebagai teman dan mendoakan hal-hal baik untukmu.🌨',
+          'NO HARD FEELINGS, ONLY GOOD WISHES🤍.']
+};
+const idx = { mix:-1, red:-1, pink:-1, white:-1 };
+const meaningEl = document.getElementById('meaning');
+function showMeaning(m){
+  idx[m] = (idx[m] + 1) % msgs[m].length;
+  meaningEl.classList.remove('swap'); void meaningEl.offsetWidth;
+  splitGlow(meaningEl, msgs[m][idx[m]]);
+  meaningEl.classList.add('swap');
+  if (!raf) raf = requestAnimationFrame(paint);
+}
+
+function regrow(){
+  plant(mode());
+  showMeaning(mode());
+  document.getElementById('toastMsg').textContent = `Taman ditanam ulang (${names[mode()]}).`;
+  bootstrap.Toast.getOrCreateInstance(toastEl).show();
+}
+document.querySelectorAll('input[name="warna"]').forEach(r => r.addEventListener('change', regrow));
+document.getElementById('replay').addEventListener('click', regrow);
+
+plant('mix');
+showMeaning('mix');
+</script>
+</body>
+</html>
