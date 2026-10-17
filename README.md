@@ -2,7 +2,7 @@
 
 Taman bunga mawar dan lily berwarna merah, pink, dan putih yang tumbuh dan mekar dengan animasi. Teksnya menyala saat didekati kursor (atau disentuh di layar HP), dan pesan kecil di bawah tombol warna berganti setiap warna dipilih.
 
-**Demo:** https://USERNAME.github.io/rose-lily-garden/
+**Demo:** https://miawmeow1.github.io/rose-lily-garden/
 
 ![Tangkapan layar Rose & Lily Garden](roselily.jpg)
 
