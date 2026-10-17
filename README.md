@@ -35,7 +35,7 @@ Untuk GitHub Pages: **Settings → Pages → Branch `main` → folder `/ (root)`
 ```
 rose-lily-garden/
 ├── index.html      # seluruh halaman (HTML, CSS, JS dalam satu file)
-├── screenshot.png  # tangkapan layar untuk README
+├── roselily.jpg    # tangkapan layar untuk README
 └── README.md
 ```
 
